@@ -1,11 +1,10 @@
 // Initialise variables.
 var canvas, ctx;
 
-var ballX = 50;
-var ballY = 50;
+var ballX, ballY;
 var ballSpeedX = 10;
 var ballSpeedY = 4;
-var ballRadius = 10;
+const BALL_RADIUS = 10;
 
 var player1Score = 0;
 var player2Score = 0;
@@ -30,12 +29,22 @@ function calculateMousePos(evt) {
   };
 }
 
+// Function to simplify constraining the paddles to the canvas.
+function clamp(number) {
+  return Math.min(Math.max(number, 10), canvas.height - PADDLE_HEIGHT - 10);
+}
+
 window.onload = function() {
   canvas = document.getElementById("game-canvas");
   ctx = canvas.getContext("2d");
 
-  canvas.height = window.innerHeight;
+  // Set the canvas to fill the window.
   canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // Start the ball in center of the canvas.
+  ballX = canvas.width / 2;
+  ballY = canvas.height / 2;
 
   //Initialise the starting position for paddles.
   paddle1Y = paddle2Y = canvas.height / 2;
@@ -99,7 +108,7 @@ function update() {
   ballY += ballSpeedY;
 
   // If the left edge of the ball is inline with the right edge of the paddle...
-  if (ballX < 10 + PADDLE_THICKNESS + ballRadius) {
+  if (ballX < 10 + PADDLE_THICKNESS + BALL_RADIUS) {
 
     // ...reflect the ball if it hits the paddle.
     if (ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT) {
@@ -118,7 +127,7 @@ function update() {
   }
 
   // If the right edge of the ball is inline with the left edge of the paddle...
-  if (ballX > canvas.width - 10 - PADDLE_THICKNESS - ballRadius) {
+  if (ballX > canvas.width - 10 - PADDLE_THICKNESS - BALL_RADIUS) {
 
     // ...reflect the ball if it hits the paddle.
     if (ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
@@ -137,14 +146,14 @@ function update() {
   }
 
   // If the ball is at the top of the screen...
-  if (ballY < 0 + ballRadius) {
+  if (ballY < 0 + BALL_RADIUS) {
 
     // ...reflect the ball.
     ballSpeedY = -ballSpeedY;
   }
 
   // If the ball is at the bottom of the screen...
-  if (ballY > canvas.height - ballRadius) {
+  if (ballY > canvas.height - BALL_RADIUS) {
 
     // ...reflect the ball.
     ballSpeedY = -ballSpeedY;
@@ -198,12 +207,12 @@ function draw() {
   // Draw the net.
   drawNet();
 
-  // Draw the circle.
-  colorCircle(ballX, ballY, ballRadius, "white");
+  // Draw the ball.
+  colorCircle(ballX, ballY, BALL_RADIUS, "white");
 
   // Draw the players' scores.
   ctx.fillText(player1Score, canvas.width / 2 - 50, 50);
-  ctx.fillText(player2Score, canvas.width - (canvas.width / 2 - 50), 50);
+  ctx.fillText(player2Score, canvas.width - (canvas.width / 2 - 45), 50);
 }
 
 // Function to simplify drawing circles.
@@ -218,9 +227,4 @@ function colorCircle(centerX, centerY, radius, color) {
 function colorRect(leftX, topY, width, height, color) {
   ctx.fillStyle = color;
   ctx.fillRect(leftX, topY, width, height);
-}
-
-// Function to simplify constraining the paddles to the canvas.
-function clamp(number) {
-  return Math.min(Math.max(number, 10), canvas.height - PADDLE_HEIGHT - 10);
 }

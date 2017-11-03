@@ -10,11 +10,24 @@ var lives = 5;
 var score = 0;
 
 var gameover = false;
-var bricks = 0;
 
 var paddleX;
 const PADDLE_THICKNESS = 10;
-const PADDLE_WIDTH = 150;
+const PADDLE_WIDTH = 100;
+
+const BRICK_ROWS = 6;
+const BRICK_COLUMNS = 20;
+const BRICK_HEIGHT = 20;
+var brickWidth;
+var bricks = [];
+
+// Fill the bricks array with bricks.
+for (let c = 0; c < BRICK_COLUMNS; c++) {
+  bricks[c] = [];
+  for (let r = 0; r < BRICK_ROWS; r++) {
+    bricks[c][r] = { x: 0, y: 0, visible: true };
+  }
+}
 
 // Return the mouse x and y position on the canvas.
 function calculateMousePos(evt) {
@@ -49,6 +62,9 @@ window.onload = function() {
   // Initialise the starting position for the paddle.
   paddleX = canvas.width / 2;
 
+  // Set the bricks to the width of the column.
+  brickWidth = canvas.width / BRICK_COLUMNS;
+
   // Update the canvas 30 times a second.
   let framesPerSecond = 30;
   setInterval(function() {
@@ -61,6 +77,19 @@ window.onload = function() {
     if (gameover) {
       lives = 5;
       score = 0;
+      ballX = canvas.width / 2;
+      ballY = canvas.height - 10 - PADDLE_THICKNESS - BALL_RADIUS;
+
+      // For each brick...
+      for (let c = 0; c < BRICK_COLUMNS; c++) {
+        for (let r = 0; r < BRICK_ROWS; r++) {
+          let b = bricks[c][r];
+
+          // ...make it visible.
+          b.visible = true;
+        }
+      }
+
       gameover = false;
     }
   })
@@ -133,11 +162,50 @@ function update() {
     // ...reflect the ball.
     ballSpeedX = -ballSpeedX;
   }
+
+  // For each brick...
+  for (let c = 0; c < BRICK_COLUMNS; c++) {
+    for (let r = 0; r < BRICK_ROWS; r++) {
+      let b = bricks[c][r];
+
+      // If the brick is visible...
+      if (b.visible == true) {
+
+        // ...and the ball is touching the brick...
+        if(ballX + BALL_RADIUS > b.x && ballX - BALL_RADIUS < b.x + brickWidth && ballY + BALL_RADIUS > b.y && ballY - BALL_RADIUS < b.y + BRICK_HEIGHT) {
+
+          // ...reflect the ball...
+          ballSpeedY = -ballSpeedY;
+
+          // ...hide the brick...
+          b.visible = false;
+
+          // ...increase the score...
+          score ++;
+
+          // ...and check to see if all the bricks have been destroyed.
+          if (score == BRICK_ROWS * BRICK_COLUMNS) {
+            gameover = true;
+          }
+        } 
+      }
+    }
+  }
 }
 
 // Draw rows of rectangles to form the bricks.
 function drawBricks() {
+  let colors = ["red", "orange", "darkOrange", "yellow", "green", "blue"]
 
+  for (let c = 0; c < BRICK_COLUMNS; c++) {
+    for (let r = 0; r < BRICK_ROWS; r++) {
+      if (bricks[c][r].visible == true) {
+        bricks[c][r].x = c * brickWidth;
+        bricks[c][r].y = r * BRICK_HEIGHT + 2 * BRICK_HEIGHT;
+        colorRect(bricks[c][r].x, bricks[c][r].y, brickWidth, BRICK_HEIGHT, colors[r]);
+      }
+    }
+  }
 }
 
 function draw() {
@@ -151,7 +219,7 @@ function draw() {
     ctx.textAlign = "center";
 
     // ...and all of the bricks have been destroyed...
-    if (bricks == 0) {
+    if (score == BRICK_ROWS * BRICK_COLUMNS) {
 
       // ...print "Winner!" in the middle of the screen.
       ctx.fillText("Winner!", canvas.width / 2, canvas.height / 3);
@@ -182,6 +250,7 @@ function draw() {
   drawBricks();
 
   // Draw the player's score and lives.
+  ctx.fillStyle = "white";
   ctx.fillText(score, 10, 20);
   ctx.fillText(lives, canvas.width - 15, 20);
 }

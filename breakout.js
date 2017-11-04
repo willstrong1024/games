@@ -47,13 +47,20 @@ function clamp(number) {
   return Math.min(Math.max(number, 10), canvas.width - PADDLE_WIDTH - 10);
 }
 
+// Simplify resizing the bricks and canvas.
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  brickWidth = canvas.width / BRICK_COLUMNS;
+}
+
 window.onload = function() {
   canvas = document.getElementById("game-canvas");
   ctx = canvas.getContext("2d");
 
-  // Set canvas to fill the window.
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // Set the canvas and bricks to fill the canvas.
+  resize();
 
   // Start the ball in the center of the canvas.
   ballX = canvas.width / 2;
@@ -62,15 +69,18 @@ window.onload = function() {
   // Initialise the starting position for the paddle.
   paddleX = canvas.width / 2;
 
-  // Set the bricks to the width of the column.
-  brickWidth = canvas.width / BRICK_COLUMNS;
-
   // Update the canvas 30 times a second.
   let framesPerSecond = 30;
   setInterval(function() {
     update();
     draw();
   }, 1000/ framesPerSecond);
+
+  // Resize the canvas when the window is resized.
+  window.addEventListener("resize", resize);
+
+  // Resize the canvas when the window is reoriented.
+  window.addEventListener("orientationchange", resize);
 
   // Load a new game on mouse click.
   canvas.addEventListener("mousedown", function() {

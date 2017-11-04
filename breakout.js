@@ -72,27 +72,12 @@ window.onload = function() {
     draw();
   }, 1000/ framesPerSecond);
 
-  // Restart the game on mouse click.
+  // Load a new game on mouse click.
   canvas.addEventListener("mousedown", function() {
     if (gameover) {
-      lives = 5;
-      score = 0;
-      ballX = canvas.width / 2;
-      ballY = canvas.height - 10 - PADDLE_THICKNESS - BALL_RADIUS;
-
-      // For each brick...
-      for (let c = 0; c < BRICK_COLUMNS; c++) {
-        for (let r = 0; r < BRICK_ROWS; r++) {
-          let b = bricks[c][r];
-
-          // ...make it visible.
-          b.visible = true;
-        }
-      }
-
-      gameover = false;
+      window.top.location.reload();
     }
-  })
+  });
 
   // Align the center of the paddle with the mouse.
   canvas.addEventListener("mousemove", function(evt) {

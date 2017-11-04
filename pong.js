@@ -56,11 +56,10 @@ window.onload = function() {
     draw();
   }, 1000 / framesPerSecond);
 
-  // Restart the game on mouse click.
+  // Load a new game on mouse click.
   canvas.addEventListener("mousedown", function() {
     if (win) {
-      player1Score = player2Score = 0;
-      win = false;
+      window.top.location.reload();
     }
   });
 

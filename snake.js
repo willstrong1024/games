@@ -6,23 +6,43 @@ var snakeY = 0;
 var xVelocity = 1;
 var yVelocity = 0;
 
-const GRID_SIZE = 20;
-const TILE_COUNT = 20;
+var gridSize, tileCount;
 
-var appleX = Math.floor(Math.random() * TILE_COUNT);
-var appleY = Math.floor(Math.random() * TILE_COUNT);
+var appleX, appleY;
 
 var trail = [];
 var tail = 1;
 
 var gameover = false;
 
+// Simplify resizing the canvas and the squares.
+function resize() {
+  if (window.innerWidth > window.innerHeight) {
+    canvas.width = canvas.height = window.innerHeight;
+  } else {
+    canvas.width = canvas.height = window.innerWidth;
+  }
+
+  gridSize = canvas.width / tileCount;
+}
+
 window.onload = function() {
   canvas = document.getElementById("game-canvas");
   ctx = canvas.getContext("2d");
 
-  // Set the canvas size.
-  canvas.width = canvas.height = 400;
+  // Work out how many squares can fit on the window.
+  if (window.innerWidth > window.innerHeight) {
+    tileCount = Math.floor(window.innerHeight / 20);
+  } else {
+    tileCount = Math.floor(window.innerWidth / 20);
+  }
+
+  // Set the starting coordinates for the apple.
+  appleX = Math.floor(Math.random() * tileCount);
+  appleY = Math.floor(Math.random() * tileCount);
+
+  // Set the canvas size to fill the window.
+  resize();
 
   // Update the canvas 15 times a second.
   let framesPerSecond = 15;
@@ -36,6 +56,12 @@ window.onload = function() {
       window.top.location.reload();
     }
   });
+
+  // Resize the canvas when the window is resized.
+  window.addEventListener("resize", resize);
+
+  // Resize the canvas when the window is reoriented.
+  window.addEventListener("resize", resize);
 
   document.addEventListener("keydown", function(evt) {
     switch(evt.keyCode) {
@@ -83,18 +109,18 @@ function update() {
 
   // Wrap the snake if it goes off of the canvas.
   if (snakeX < 0) {
-    snakeX = TILE_COUNT - 1;
+    snakeX = tileCount - 1;
   }
   
-  if (snakeX > TILE_COUNT - 1) {
+  if (snakeX > tileCount - 1) {
     snakeX = 0;
   }
 
   if (snakeY < 0) {
-    snakeY = TILE_COUNT - 1;
+    snakeY = tileCount - 1;
   }
 
-  if (snakeY > TILE_COUNT - 1) {
+  if (snakeY > tileCount - 1) {
     snakeY = 0;
   }
 
@@ -128,8 +154,8 @@ function update() {
     tail++;
 
     // ...and choose a new random square for the apple.
-    appleX = Math.floor(Math.random() * TILE_COUNT);
-    appleY = Math.floor(Math.random() * TILE_COUNT);
+    appleX = Math.floor(Math.random() * tileCount);
+    appleY = Math.floor(Math.random() * tileCount);
   }
 }
 
@@ -156,11 +182,11 @@ function draw() {
 
   // Draw a white rectangle for each section of the snake's tail.
   for (let i = 0; i < trail.length; i++) {
-    colorRect(trail[i].x * GRID_SIZE, trail[i].y * GRID_SIZE, GRID_SIZE, GRID_SIZE, "white");
+    colorRect(trail[i].x * gridSize, trail[i].y * gridSize, gridSize, gridSize, "white");
   }
 
   // Draw a white rectangle for the apple.
-  colorRect(appleX * GRID_SIZE, appleY * GRID_SIZE, GRID_SIZE, GRID_SIZE, "white");
+  colorRect(appleX * gridSize, appleY * gridSize, gridSize, gridSize, "white");
 
   // Draw the score in the top right corner.
   ctx.fillText(tail, 10, 20);

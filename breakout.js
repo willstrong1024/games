@@ -59,7 +59,7 @@ window.onload = function() {
   canvas = document.getElementById("game-canvas");
   ctx = canvas.getContext("2d");
 
-  // Set the canvas and bricks to fill the canvas.
+  // Set the canvas and bricks to fill the window.
   resize();
 
   // Start the ball in the center of the canvas.

@@ -30,19 +30,19 @@ window.onload = function() {
   canvas = document.getElementById("game-canvas");
   ctx = canvas.getContext("2d");
 
-  // Work out how many squares can fit on the window.
+  // Work out how many squares of size 20 can fit in the window.
   if (window.innerWidth > window.innerHeight) {
     tileCount = Math.floor(window.innerHeight / 20);
   } else {
     tileCount = Math.floor(window.innerWidth / 20);
   }
 
+  // Set the canvas size to fill the window.
+  resize();
+
   // Set the starting coordinates for the apple.
   appleX = Math.floor(Math.random() * tileCount);
   appleY = Math.floor(Math.random() * tileCount);
-
-  // Set the canvas size to fill the window.
-  resize();
 
   // Update the canvas 15 times a second.
   let framesPerSecond = 15;

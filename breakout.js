@@ -2,7 +2,7 @@
 var canvas, ctx;
 
 var ballX, ballY;
-var ballSpeedX = 4;
+var ballSpeedX = 5;
 var ballSpeedY = 10;
 const BALL_RADIUS = 10;
 
@@ -13,21 +13,12 @@ var gameover = false;
 
 var paddleX;
 const PADDLE_THICKNESS = 10;
-const PADDLE_WIDTH = 100;
+const PADDLE_WIDTH = 150;
 
 const BRICK_ROWS = 6;
-const BRICK_COLUMNS = 20;
 const BRICK_HEIGHT = 20;
-var brickWidth;
+var brickWidth, brickColumns;
 var bricks = [];
-
-// Fill the bricks array with bricks.
-for (let c = 0; c < BRICK_COLUMNS; c++) {
-  bricks[c] = [];
-  for (let r = 0; r < BRICK_ROWS; r++) {
-    bricks[c][r] = { x: 0, y: 0, visible: true };
-  }
-}
 
 // Return the mouse x and y position on the canvas.
 function calculateMousePos(evt) {
@@ -52,19 +43,40 @@ function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  brickWidth = canvas.width / BRICK_COLUMNS;
+  brickWidth = canvas.width / brickColumns;
+}
+
+// Reset the ball when it goes past the paddle, or when the game is over.
+function reset() {
+  if (lives <= 0) {
+    gameover = true;
+  }
+
+  ballSpeedY = -ballSpeedY;
+  ballX = canvas.width / 2;
+  ballY = canvas.height - 10 - PADDLE_THICKNESS - BALL_RADIUS;
 }
 
 window.onload = function() {
   canvas = document.getElementById("game-canvas");
   ctx = canvas.getContext("2d");
 
+  // Work out how many columns of size 96 can fit in the window.
+  brickColumns = Math.floor(window.innerWidth / 96);
+
+  // Fill the bricks array with bricks.
+  for (let c = 0; c < brickColumns; c++) {
+    bricks[c] = [];
+    for (let r = 0; r < BRICK_ROWS; r++) {
+      bricks[c][r] = { x: 0, y: 0, visible: true };
+    }
+  }
+
   // Set the canvas and bricks to fill the window.
   resize();
 
   // Start the ball in the center of the canvas.
-  ballX = canvas.width / 2;
-  ballY = canvas.height;
+  reset();
 
   // Initialise the starting position for the paddle.
   paddleX = canvas.width / 2;
@@ -94,17 +106,6 @@ window.onload = function() {
     let mousePos = calculateMousePos(evt);
     paddleX = clamp(mousePos.x - PADDLE_WIDTH / 2);
   });
-}
-
-// Reset the ball when it goes past the paddle, or when the game is over.
-function reset() {
-  if (lives <= 0) {
-    gameover = true;
-  }
-
-  ballSpeedY = -ballSpeedY;
-  ballX = canvas.width / 2;
-  ballY = canvas.height - 10 - PADDLE_THICKNESS - BALL_RADIUS;
 }
 
 function update() {
@@ -159,7 +160,7 @@ function update() {
   }
 
   // For each brick...
-  for (let c = 0; c < BRICK_COLUMNS; c++) {
+  for (let c = 0; c < brickColumns; c++) {
     for (let r = 0; r < BRICK_ROWS; r++) {
       let b = bricks[c][r];
 
@@ -179,7 +180,7 @@ function update() {
           score ++;
 
           // ...and check to see if all the bricks have been destroyed.
-          if (score == BRICK_ROWS * BRICK_COLUMNS) {
+          if (score == BRICK_ROWS * brickColumns) {
             gameover = true;
           }
         } 
@@ -192,7 +193,7 @@ function update() {
 function drawBricks() {
   let colors = ["red", "orange", "darkOrange", "yellow", "green", "blue"]
 
-  for (let c = 0; c < BRICK_COLUMNS; c++) {
+  for (let c = 0; c < brickColumns; c++) {
     for (let r = 0; r < BRICK_ROWS; r++) {
       if (bricks[c][r].visible == true) {
         bricks[c][r].x = c * brickWidth;
@@ -214,7 +215,7 @@ function draw() {
     ctx.textAlign = "center";
 
     // ...and all of the bricks have been destroyed...
-    if (score == BRICK_ROWS * BRICK_COLUMNS) {
+    if (score == BRICK_ROWS * brickColumns) {
 
       // ...print "Winner!" in the middle of the screen.
       ctx.fillText("Winner!", canvas.width / 2, canvas.height / 3);

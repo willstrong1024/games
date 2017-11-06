@@ -3,10 +3,10 @@ var canvas, ctx;
 
 var snakeX = 0;
 var snakeY = 0;
-var xVelocity = 1;
-var yVelocity = 0;
+var buffer = [{x: 1, y: 0}];
 
-var gridSize, tileCount;
+var gridSizeX, gridSizeY;
+var tileCountX, tileCounY;
 
 var appleX, appleY;
 
@@ -17,13 +17,11 @@ var gameover = false;
 
 // Simplify resizing the canvas and the squares.
 function resize() {
-  if (window.innerWidth > window.innerHeight) {
-    canvas.width = canvas.height = window.innerHeight;
-  } else {
-    canvas.width = canvas.height = window.innerWidth;
-  }
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  gridSize = canvas.width / tileCount;
+  gridSizeX = canvas.width / tileCountX;
+  gridSizeY = canvas.height / tileCountY;
 }
 
 window.onload = function() {
@@ -31,18 +29,15 @@ window.onload = function() {
   ctx = canvas.getContext("2d");
 
   // Work out how many squares of size 20 can fit in the window.
-  if (window.innerWidth > window.innerHeight) {
-    tileCount = Math.floor(window.innerHeight / 20);
-  } else {
-    tileCount = Math.floor(window.innerWidth / 20);
-  }
+  tileCountX = Math.floor(window.innerWidth / 20);
+  tileCountY = Math.floor(window.innerHeight / 20);
 
   // Set the canvas size to fill the window.
   resize();
 
   // Set the starting coordinates for the apple.
-  appleX = Math.floor(Math.random() * tileCount);
-  appleY = Math.floor(Math.random() * tileCount);
+  appleX = Math.floor(Math.random() * tileCountX);
+  appleY = Math.floor(Math.random() * tileCountY);
 
   // Update the canvas 15 times a second.
   let framesPerSecond = 15;
@@ -63,33 +58,30 @@ window.onload = function() {
   // Resize the canvas when the window is reoriented.
   window.addEventListener("resize", resize);
 
+  // Push the next direction to the buffer.
   document.addEventListener("keydown", function(evt) {
     switch(evt.keyCode) {
       case 37:
-        if (xVelocity != 1) {
-          xVelocity = -1;
-          yVelocity = 0;
+        if (buffer[0].x != 1) {
+          buffer.push({x: -1, y: 0});
         }
         break;
 
       case 38:
-        if (yVelocity != 1) {
-          xVelocity = 0;
-          yVelocity = -1;
+        if (buffer[0].y != 1) {
+          buffer.push({x: 0, y: -1});
         }
         break;
 
       case 39:
-        if (xVelocity != -1) {
-          xVelocity = 1;
-          yVelocity = 0;
+        if (buffer[0].x != -1) {
+          buffer.push({x: 1, y: 0});
         }
         break;
 
       case 40:
-        if (yVelocity != -1) {
-          xVelocity = 0;
-          yVelocity = 1;
+        if (buffer[0].y != -1) {
+          buffer.push({x: 0, y: 1});
         }
         break;
     }
@@ -104,23 +96,30 @@ function update() {
   }
 
   // Update the snake's coordinates.
-  snakeX += xVelocity;
-  snakeY += yVelocity;
+  snakeX += buffer[0].x;
+  snakeY += buffer[0].y;
+
+  // If the buffer is longer than one...
+  if (buffer.length > 1) {
+
+    // ...remove the first entry.
+    buffer.shift();
+  }
 
   // Wrap the snake if it goes off of the canvas.
   if (snakeX < 0) {
-    snakeX = tileCount - 1;
+    snakeX = tileCountX - 1;
   }
   
-  if (snakeX > tileCount - 1) {
+  if (snakeX > tileCountX - 1) {
     snakeX = 0;
   }
 
   if (snakeY < 0) {
-    snakeY = tileCount - 1;
+    snakeY = tileCountY - 1;
   }
 
-  if (snakeY > tileCount - 1) {
+  if (snakeY > tileCountY - 1) {
     snakeY = 0;
   }
 
@@ -154,8 +153,8 @@ function update() {
     tail++;
 
     // ...and choose a new random square for the apple.
-    appleX = Math.floor(Math.random() * tileCount);
-    appleY = Math.floor(Math.random() * tileCount);
+    appleX = Math.floor(Math.random() * tileCountX);
+    appleY = Math.floor(Math.random() * tileCountY);
   }
 }
 
@@ -182,11 +181,11 @@ function draw() {
 
   // Draw a white rectangle for each section of the snake's tail.
   for (let i = 0; i < trail.length; i++) {
-    colorRect(trail[i].x * gridSize, trail[i].y * gridSize, gridSize, gridSize, "white");
+    colorRect(trail[i].x * gridSizeX, trail[i].y * gridSizeY, gridSizeX, gridSizeY, "white");
   }
 
   // Draw a white rectangle for the apple.
-  colorRect(appleX * gridSize, appleY * gridSize, gridSize, gridSize, "white");
+  colorRect(appleX * gridSizeX, appleY * gridSizeY, gridSizeX, gridSizeY, "white");
 
   // Draw the score in the top right corner.
   ctx.fillText(tail, 10, 20);
